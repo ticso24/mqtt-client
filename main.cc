@@ -28,6 +28,9 @@
  *
  */
 
+#define EINSCHALTEINGANG "io88-1/input1"
+#define EINSCHALTAUSGANG "io88-1/output2"
+
 #include "main.h"
 #include <mosquitto.h>
 #include "mqtt.h"
@@ -65,11 +68,11 @@ ProcessLoop(void* arg)
 	mqtt.subscribe("io88-1/+");
 	for(;;) {
 		try {
-			bool einschaltsignal = mqtt.get_topic("io88-1/input1") == "1";
+			bool einschaltsignal = mqtt.get_topic(EINSCHALTEINGANG) == "1";
 			if (einschaltsignal) {
-				mqtt.publish_ifchanged("io88-1/output2", "1");
+				mqtt.publish_ifchanged(EINSCHALTAUSGANG, "1");
 			} else {
-				mqtt.publish_ifchanged("io88-1/output2", "0");
+				mqtt.publish_ifchanged(EINSCHALTAUSGANG, "0");
 			}
 			usleep(100000);
 		} catch(...) {
