@@ -28,8 +28,10 @@
  *
  */
 
-#define EINSCHALTEINGANG "io88-1/input1"
-#define EINSCHALTAUSGANG "io88-1/output2"
+#define LICHTSCHALTER_KELLERTREPPE_OBEN1 "cicely/mb1.cicely.de/255/input0"
+#define LICHTSCHALTER_KELLERTREPPE_OBEN2 "cicely/mb1.cicely.de/255/input1"
+#define LICHT_KELLERTREPPE "cicely/mb1.cicely.de/255/relais0"
+#define LICHT_KELLERGANG "cicely/mb1.cicely.de/255/relais1"
 
 #include "main.h"
 #include <mosquitto.h>
@@ -65,18 +67,41 @@ static MQTT mqtt;
 void*
 ProcessLoop(void* arg)
 {
-	mqtt.subscribe("io88-1/+");
+	mqtt.subscribe("cicely/#");
 	for(;;) {
 		try {
-			bool einschaltsignal = mqtt.get_topic(EINSCHALTEINGANG) == "1";
-			if (einschaltsignal) {
-				mqtt.publish_ifchanged(EINSCHALTAUSGANG, "1");
-			} else {
-				mqtt.publish_ifchanged(EINSCHALTAUSGANG, "0");
+			static bool init;
+			static bool schalter1_alt;
+			static bool schalter2_alt;
+
+			bool schalter1 = mqtt.get_topic(LICHTSCHALTER_KELLERTREPPE_OBEN1) == "1";
+			bool schalter2 = mqtt.get_topic(LICHTSCHALTER_KELLERTREPPE_OBEN2) == "1";
+			bool licht1 = false;
+			bool licht2 = false;
+			try {
+				licht1 = mqtt.get_topic(LICHT_KELLERTREPPE) == "1";
+				licht2 = mqtt.get_topic(LICHT_KELLERGANG) == "1";
+			} catch(...) {
 			}
+
+			if (init) {
+				if (schalter1 != schalter1_alt || schalter2 != schalter2_alt) {
+					if (licht1) {
+						mqtt.publish_ifchanged(LICHT_KELLERTREPPE, "0");
+						mqtt.publish_ifchanged(LICHT_KELLERGANG, "0");
+					} else {
+						mqtt.publish_ifchanged(LICHT_KELLERTREPPE, "1");
+						mqtt.publish_ifchanged(LICHT_KELLERGANG, "1");
+					}
+				}
+			}
+
+			init = true;
+			schalter1_alt = schalter1;
+			schalter2_alt = schalter2;
+
 			usleep(100000);
 		} catch(...) {
-			sleep(1);
 		}
 	}
 }
