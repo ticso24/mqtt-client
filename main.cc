@@ -86,11 +86,15 @@ main(int argc, char *argv[]) {
 	String configfile = "/usr/local/etc/mqtt-client.conf";
 
 	int ch;
+	bool debug = false;
 
-	while ((ch = getopt(argc, argv, "c:")) != -1) {
+	while ((ch = getopt(argc, argv, "dc:")) != -1) {
 		switch (ch) {
 		case 'c':
 			configfile = optarg;
+			break;
+		case 'd':
+			debug = true;
 			break;
 		case '?':
 			default:
@@ -99,6 +103,10 @@ main(int argc, char *argv[]) {
 	}
 	argc -= optind;
 	argv += optind;
+
+	if (!debug) {
+		daemon(0, 0);
+	}
 
 	{
 		File f;
@@ -149,7 +157,7 @@ main(int argc, char *argv[]) {
 void
 usage(void) {
 
-	printf("usage: mb_mqttbridge [-c configfile]\n");
+	printf("usage: mqtt_client [-d] [-c configfile]\n");
 	exit(1);
 }
 
