@@ -164,7 +164,7 @@ main(int argc, char *argv[]) {
 		String willtopic = maintopic + "/status";
 		mqtt.publish(willtopic, "online", true);
 		mqtt.publish(maintopic + "/product", "mb_client", true);
-		mqtt.publish(maintopic + "/version", "0.1", true);
+		mqtt.publish(maintopic + "/version", "0.2", true);
 	} else {
 		printf("no mqtt setup in config\n");
 		exit(1);
