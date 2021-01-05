@@ -1,2 +1,2 @@
-mb_mqttbridge
+mqtt_client
 *.o
