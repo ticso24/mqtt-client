@@ -74,13 +74,13 @@ ProcessLoop(void* arg)
 			static bool schalter1_alt;
 			static bool schalter2_alt;
 
-			bool schalter1 = mqtt.get_topic(LICHTSCHALTER_KELLERTREPPE_OBEN1) == "1";
-			bool schalter2 = mqtt.get_topic(LICHTSCHALTER_KELLERTREPPE_OBEN2) == "1";
+			bool schalter1 = mqtt[LICHTSCHALTER_KELLERTREPPE_OBEN1] == "1";
+			bool schalter2 = mqtt[LICHTSCHALTER_KELLERTREPPE_OBEN2] == "1";
 			bool licht1 = false;
 			bool licht2 = false;
 			try {
-				licht1 = mqtt.get_topic(LICHT_KELLERTREPPE) == "1";
-				licht2 = mqtt.get_topic(LICHT_KELLERGANG) == "1";
+				licht1 = mqtt[LICHT_KELLERTREPPE] == "1";
+				licht2 = mqtt[LICHT_KELLERGANG] == "1";
 			} catch(...) {
 			}
 
@@ -161,6 +161,10 @@ main(int argc, char *argv[]) {
 		String maintopic = mqtt_cfg["maintopic"];
 		mqtt.maintopic = maintopic;
 		mqtt.connect();
+		String willtopic = maintopic + "/status";
+		mqtt.publish(willtopic, "online", true);
+		mqtt.publish(maintopic + "/product", "mb_client", true);
+		mqtt.publish(maintopic + "/version", "0.1", true);
 	} else {
 		printf("no mqtt setup in config\n");
 		exit(1);

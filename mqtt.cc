@@ -61,11 +61,6 @@ MQTT::connect()
 		rc = mosquitto_connect(mosq, host.c_str(), port, 5);
 
 		mosquitto_loop_start(mosq);
-		mosquitto_publish(mosq, NULL, willtopic.c_str(), strlen("online"), "online", 1, true);
-		String producttopic = maintopic + "/product";
-		mosquitto_publish(mosq, NULL, producttopic.c_str(), strlen("mb_client"), "mb_client", 1, true);
-		String versiontopic = maintopic + "/version";
-		mosquitto_publish(mosq, NULL, versiontopic.c_str(), strlen("0.1"), "0.1", 1, true);
 		return true;
 	}
 
@@ -83,7 +78,7 @@ MQTT::disconnect()
 }
 
 void
-MQTT::publish_ifchanged(String topic, String message)
+MQTT::publish_ifchanged(const String& topic, const String& message)
 {
 	bool send;
 
@@ -101,7 +96,7 @@ MQTT::publish_ifchanged(String topic, String message)
 }
 
 void
-MQTT::publish(String topic, String message, bool retain)
+MQTT::publish(const String& topic, const String& message, bool retain)
 {
 	mosquitto_publish(mosq, NULL, topic.c_str(), message.length(), message.c_str(), 1, retain);
 	rxdata_mtx.lock();
@@ -110,14 +105,31 @@ MQTT::publish(String topic, String message, bool retain)
 }
 
 void
-MQTT::subscribe(String topic)
+MQTT::subscribe(const String& topic)
 {
+	subscribtion_mtx.lock();
 	mosquitto_subscribe(mosq, NULL, topic.c_str(), 0);
+	subscribtions << topic;
+	subscribtion_mtx.unlock();
 }
 
 void
 MQTT::int_connect_callback(struct mosquitto *mosq, void *obj, int result)
 {
+	MQTT* me = (MQTT*)obj;
+	me->connect_callback(result);
+}
+
+void
+MQTT::connect_callback(int result)
+{
+	if (result == 0) {
+		subscribtion_mtx.lock();
+		for (int64_t i = 0; i <= subscribtions.max; i++) {
+			mosquitto_subscribe(mosq, NULL, subscribtions[i].c_str(), 0);
+		}
+		subscribtion_mtx.unlock();
+	}
 }
 
 void
@@ -131,7 +143,7 @@ MQTT::int_message_callback(struct mosquitto *mosq, void *obj, const struct mosqu
 }
 
 void
-MQTT::message_callback(String topic, String message)
+MQTT::message_callback(const String& topic, const String& message)
 {
 	rxdata_mtx.lock();
 	rxdata[topic] = message;
@@ -144,25 +156,17 @@ MQTT::message_callback(String topic, String message)
 }
 
 Array<MQTT::RXbuf>
-MQTT::get_rxbuf(const String& maintopic)
+MQTT::get_rxbuf()
 {
 	Array<RXbuf> tmp;
-	if (rxbuf_enable) {
-		rxdata_mtx.lock();
-		for (int64_t i = 0; i <= rxbuf.max; i++) {
-			if (rxbuf[i].topic.strncmp(maintopic)) {
-				tmp << rxbuf[i];
-				rxbuf.del(i);
-				i--;
-			}
-		}
-		rxdata_mtx.unlock();
-	}
+	rxdata_mtx.lock();
+	std::swap(tmp, rxbuf);
+	rxdata_mtx.unlock();
 	return tmp;
 }
 
 String
-MQTT::get_topic(const String& topic)
+MQTT::operator[](const String& topic)
 {
 	String ret;
 	bool existing;

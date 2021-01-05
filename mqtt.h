@@ -46,10 +46,13 @@ private:
 	AArray<String> rxdata;
 	Mutex rxdata_mtx;
 	Array<RXbuf> rxbuf;
+	Array<String> subscribtions;
+	Mutex subscribtion_mtx;
 
 	static void int_connect_callback(struct mosquitto *mosq, void *obj, int result);
+	void connect_callback(int result);
 	static void int_message_callback(struct mosquitto *mosq, void *obj, const struct mosquitto_message *message);
-	void message_callback(String topic, String message);
+	void message_callback(const String& topic, const String& message);
 
 public:
 	String id;
@@ -59,16 +62,18 @@ public:
 	String password;
 	String maintopic;
 	bool rxbuf_enable;
+	String product;
+	String version;
 
 	MQTT();
 	~MQTT();
 	bool connect(void);
 	void disconnect(void);
-	void publish(String topic, String message, bool retain = true);
-	void publish_ifchanged(String topic, String message);
-	void subscribe(String topic);
-	Array<RXbuf> get_rxbuf(const String& maintopic);
-	String get_topic(const String& topic);
+	void publish(const String& topic, const String& message, bool retain = true);
+	void publish_ifchanged(const String& topic, const String& message);
+	void subscribe(const String& topic);
+	Array<RXbuf> get_rxbuf();
+	String operator[](const String& topic);
 };
 
 #endif /* I_MQTT */
