@@ -28,11 +28,6 @@
  *
  */
 
-#define LICHTSCHALTER_KELLERTREPPE_OBEN1 "cicely/mb1.cicely.de/255/input0"
-#define LICHTSCHALTER_KELLERTREPPE_OBEN2 "cicely/mb1.cicely.de/255/input1"
-#define LICHT_KELLERTREPPE "cicely/mb1.cicely.de/255/relais0"
-#define LICHT_KELLERGANG "cicely/mb1.cicely.de/255/relais1"
-
 #include "main.h"
 #include <mosquitto.h>
 #include "mqtt.h"
@@ -69,29 +64,34 @@ ProcessLoop(void* arg)
 {
 	mqtt.subscribe("cicely/#");
 	for(;;) {
+		a_refptr<JSON> my_config = config;
+		JSON& cfg = *my_config.get();
+		JSON& e = cfg["elements"];
+		JSON& lichtschalter = e["Lichtschalter"];
+		JSON& lampen = e["Lampen"];
 		try {
 			static bool init;
 			static bool schalter1_alt;
 			static bool schalter2_alt;
 
-			bool schalter1 = mqtt[LICHTSCHALTER_KELLERTREPPE_OBEN1] == "1";
-			bool schalter2 = mqtt[LICHTSCHALTER_KELLERTREPPE_OBEN2] == "1";
+			bool schalter1 = mqtt[lichtschalter["Schaltwippe Kellertreppe oben"]] == "1";
+			bool schalter2 = mqtt[lichtschalter["Drehschalter Kellertreppe oben"]] == "1";
 			bool licht1 = false;
 			bool licht2 = false;
 			try {
-				licht1 = mqtt[LICHT_KELLERTREPPE] == "1";
-				licht2 = mqtt[LICHT_KELLERGANG] == "1";
+				licht1 = mqtt[lampen["Kellertreppe"]] == "1";
+				licht2 = mqtt[lampen["Kellergang"]] == "1";
 			} catch(...) {
 			}
 
 			if (init) {
 				if (schalter1 != schalter1_alt || schalter2 != schalter2_alt) {
 					if (licht1) {
-						mqtt.publish_ifchanged(LICHT_KELLERTREPPE, "0");
-						mqtt.publish_ifchanged(LICHT_KELLERGANG, "0");
+						mqtt.publish_ifchanged(lampen["Kellertreppe"], "0");
+						mqtt.publish_ifchanged(lampen["Kellergang"], "0");
 					} else {
-						mqtt.publish_ifchanged(LICHT_KELLERTREPPE, "1");
-						mqtt.publish_ifchanged(LICHT_KELLERGANG, "1");
+						mqtt.publish_ifchanged(lampen["Kellertreppe"], "1");
+						mqtt.publish_ifchanged(lampen["Kellergang"], "1");
 					}
 				}
 			}
