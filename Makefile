@@ -32,6 +32,7 @@ LDFLAGS = `libbwct-config --libs` -lmosquitto
 
 BIN = mqtt_client
 OBJ = main.o mqtt.o
+BINDIR ?= /usr/local/sbin
 
 all: $(BIN)
 
@@ -43,3 +44,7 @@ $(BIN): $(OBJ)
 
 .cc.o:
 	$(CXX) $(CFLAGS) -c $<
+
+install:
+	mkdir -p $(BINDIR)
+	install $(BIN) $(BINDIR)
