@@ -74,13 +74,13 @@ ProcessLoop(void* arg)
 			static bool schalter1_alt;
 			static bool schalter2_alt;
 
-			bool schalter1 = mqtt[lichtschalter["Schaltwippe Kellertreppe oben"]] == "1";
-			bool schalter2 = mqtt[lichtschalter["Drehschalter Kellertreppe oben"]] == "1";
+			bool schalter1 = mqtt[lichtschalter["Schaltwippe Kellertreppe oben"]];
+			bool schalter2 = mqtt[lichtschalter["Drehschalter Kellertreppe oben"]];
 			bool licht1 = false;
 			bool licht2 = false;
 			try {
-				licht1 = mqtt[lampen["Kellertreppe"]] == "1";
-				licht2 = mqtt[lampen["Kellergang"]] == "1";
+				licht1 = mqtt[lampen["Kellertreppe"]];
+				licht2 = mqtt[lampen["Kellergang"]];
 			} catch(...) {
 			}
 
