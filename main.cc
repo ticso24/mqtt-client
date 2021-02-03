@@ -108,7 +108,7 @@ ProcessLoop(void* arg)
 
 int
 main(int argc, char *argv[]) {
-	String configfile = "/usr/local/etc/mqtt-client.conf";
+	String configfile = "/usr/local/etc/mqtt-client.json";
 	String pidfile = "/var/run/mqtt_client.pid";
 
 	openlog(argv[0], LOG_PID, LOG_LOCAL0);
