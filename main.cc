@@ -176,7 +176,7 @@ main(int argc, char *argv[]) {
 		mqtt.password = password;
 		String maintopic = mqtt_cfg["maintopic"];
 		mqtt.maintopic = maintopic;
-		main_mqtt.autoonline = true;
+		mqtt.autoonline = true;
 		mqtt.connect();
 		String willtopic = maintopic + "/status";
 		mqtt.publish(willtopic, "online", true);
