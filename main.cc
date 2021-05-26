@@ -87,11 +87,11 @@ ProcessLoop(void* arg)
 			if (init) {
 				if (schalter1 != schalter1_alt || schalter2 != schalter2_alt) {
 					if (licht1) {
-						mqtt.publish_ifchanged(lampen["Kellertreppe"], "0");
-						mqtt.publish_ifchanged(lampen["Kellergang"], "0");
+						mqtt.publish(lampen["Kellertreppe"], "0", true, true);
+						mqtt.publish(lampen["Kellergang"], "0", true, true);
 					} else {
-						mqtt.publish_ifchanged(lampen["Kellertreppe"], "1");
-						mqtt.publish_ifchanged(lampen["Kellergang"], "1");
+						mqtt.publish(lampen["Kellertreppe"], "1", true, true);
+						mqtt.publish(lampen["Kellergang"], "1", true, true);
 					}
 				}
 			}
