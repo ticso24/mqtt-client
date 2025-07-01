@@ -32,11 +32,12 @@
 #define MAIN
 
 #include <bwct/bwct.h>
+using namespace bwct;
 
 int main(int argc, char *argv[]);
 void usage(void);
 void siginit(void);
 void sighandler(int sig);
-extern a_refptr<JSON> config;
+extern std::shared_ptr<JSON> config;
 
 #endif /* MAIN */

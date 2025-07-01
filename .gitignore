@@ -1,2 +1,6 @@
 mqtt_client
-*.o
+Makefile
+CMakeCache.txt
+install_manifest.txt
+CMakeFiles/
+cmake_install.cmake

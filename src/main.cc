@@ -32,7 +32,7 @@
 #include <mosquitto.h>
 #include "mqtt.h"
 
-a_refptr<JSON> config;
+std::shared_ptr<JSON> config;
 
 void
 siginit()
@@ -64,7 +64,9 @@ ProcessLoop(void* arg)
 {
 	mqtt.subscribe("cicely/#");
 	for(;;) {
-		a_refptr<JSON> my_config = config;
+		String willtopic = mqtt.maintopic + "/status";
+		mqtt.publish(willtopic, "online", true);
+		auto my_config = config;
 		JSON& cfg = *my_config.get();
 		JSON& e = cfg["elements"];
 		JSON& lichtschalter = e["Lichtschalter"];
@@ -153,13 +155,13 @@ main(int argc, char *argv[]) {
 		File f;
 		f.open(configfile, O_RDONLY);
 		String json(f);
-		config = new(JSON);
+		config.reset(new(JSON));
 		config->parse(json);
 	}
 
 	mosquitto_lib_init();
 
-	a_refptr<JSON> my_config = config;
+	auto my_config = config;
 	JSON& cfg = *my_config.get();
 
 	if (cfg.exists("mqtt")) {
